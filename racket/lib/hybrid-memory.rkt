@@ -7,7 +7,7 @@
          stack-addr? heap-addr? hybrid-memmgr-trace-equal? enable-stack-addr-symopt
          set-hybrid-memmgr-bpf-stack-range! hybrid-memmgr-trace-event!
          set-hybrid-memmgr-stacksize! (struct-out call-event)
-         hybrid-memmgr-get-fresh-bytes)
+         hybrid-memmgr-get-fresh-bytes hybrid-memmgr-trace)
 
 (define enable-stack-addr-symopt (make-environment-flag "ENABLE_STACK_ADDR_SYMOPT" #f))
 
