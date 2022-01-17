@@ -25,6 +25,7 @@
   (define initial-state? (bpf-target-initial-state? target))
   (define arch-invariants (bpf-target-arch-invariants target))
   (define bpf-stack-range (bpf-target-bpf-stack-range target))
+  (define jitted-code-range (bpf-target-jitted-code-range target))
   (define abstract-regs (bpf-target-abstract-regs target))
   (define copy-target-cpu (bpf-target-copy-target-cpu target))
   (define ctx-valid? (bpf-target-ctx-valid? target))
@@ -33,7 +34,8 @@
   (define prog-aux (make-bpf-prog-aux))
   (define ctx (init-ctx target-pc-base (bv 0 32) (bv 0 32) prog-aux))
 
-  (define memmgr (make-hybrid-memmgr target-bitwidth 64 (max-stack-usage ctx)))
+  (define memmgr (make-hybrid-memmgr target-bitwidth 64 (max-stack-usage ctx)
+                                     #:jitted-code-range (jitted-code-range ctx target-pc-base)))
   (define target-cpu (init-cpu ctx target-pc-base (copy-hybrid-memmgr memmgr)))
   (define initial-cpu (copy-target-cpu target-cpu))
 

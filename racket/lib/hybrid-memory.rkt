@@ -7,7 +7,7 @@
          stack-addr? heap-addr? hybrid-memmgr-trace-equal? enable-stack-addr-symopt
          set-hybrid-memmgr-bpf-stack-range! hybrid-memmgr-trace-event!
          set-hybrid-memmgr-stacksize! (struct-out call-event)
-         hybrid-memmgr-get-fresh-bytes hybrid-memmgr-trace)
+         hybrid-memmgr-get-fresh-bytes hybrid-memmgr-trace set-hybrid-memmgr-jitted-code!)
 
 (define enable-stack-addr-symopt (make-environment-flag "ENABLE_STACK_ADDR_SYMOPT" #f))
 
@@ -46,6 +46,12 @@
              B
              (extract (- (* (+ i 1) bitwidth) 1) (* i bitwidth) value)))
     (event address N value)))
+
+(define (code-addr? memmgr address size)
+  (match (hybrid-memmgr-jitted-code-range memmgr)
+    [(cons codestart codeend)
+     (&& (bvuge address codestart) (bvule (bvadd address (bvsub1 size)) codeend))]
+    [#f #f]))
 
 ; Tell if a stack access (address, size) is in bounds on the stack.
 ; First use symbolic optimization stack-addr? to see where to dispatch access,
@@ -158,6 +164,13 @@
   (define address (make-address memmgr addr off size))
 
   (cond
+    [(code-addr? memmgr address size)
+     (core:memmgr-load
+       (hybrid-memmgr-jitted-code memmgr)
+       (bvsub address (car (hybrid-memmgr-jitted-code-range memmgr)))
+       (bv 0 (type-of addr))
+       size)]
+
     [(and (enable-stack-addr-symopt) (stack-addr-symopt? memmgr address size))
       (core:bug-assert (stack-addr? memmgr address size)
               #:msg "stack-addr-symopt? Must return #t only for actual stack addresses")
@@ -182,7 +195,12 @@
       value]
     [else (core:bug #:msg "hybrid-memmgr-load: address cannot overlap stack+heap")]))
 
-(define (make-hybrid-memmgr bitwidth size stacksize #:bpf-stack-range [bpf-stack-range #f])
+(define (make-hybrid-memmgr
+          bitwidth
+          size
+          stacksize
+          #:bpf-stack-range [bpf-stack-range #f]
+          #:jitted-code-range [jitted-code-range #f])
 
   ; Initially empty trace
   (define trace (list))
@@ -197,7 +215,7 @@
   ; The rest of memory is a list of symbolic bv8 bytes
   (define memory (build-list size (lambda (x) (core:make-bv8))))
 
-  (hybrid-memmgr stackbase stacksize bpf-stack-range stack trace memory bitwidth))
+  (hybrid-memmgr jitted-code-range #f stackbase stacksize bpf-stack-range stack trace memory bitwidth))
 
 (define (hybrid-memory-atomic-begin memmgr)
   (hybrid-memmgr-trace-event! memmgr (atomic-begin-event)))
@@ -219,7 +237,7 @@
   (equal? (hybrid-memmgr-trace m1) (hybrid-memmgr-trace m2)))
 
 (struct hybrid-memmgr
-        (stackbase stacksize bpf-stack-range stack trace memory bitwidth)
+        (jitted-code-range jitted-code stackbase stacksize bpf-stack-range stack trace memory bitwidth)
         #:transparent #:mutable
 
   #:methods core:gen:memmgr [

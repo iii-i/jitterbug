@@ -25,6 +25,7 @@
   (define arch-invariants (bpf-target-arch-invariants target))
   (define arch-safety (bpf-target-arch-safety target))
   (define bpf-stack-range (bpf-target-bpf-stack-range target))
+  (define jitted-code-range (bpf-target-jitted-code-range target))
   (define abstract-regs (bpf-target-abstract-regs target))
   (define abstract-return-value (bpf-target-abstract-return-value target))
 
@@ -32,7 +33,8 @@
   (define prog-aux (make-bpf-prog-aux))
   (define ctx (init-ctx target-pc-base (bv 0 32) (bv 0 32) prog-aux))
 
-  (define memmgr (make-hybrid-memmgr target-bitwidth 64 (max-stack-usage ctx)))
+  (define memmgr (make-hybrid-memmgr target-bitwidth 64 (max-stack-usage ctx)
+                                     #:jitted-code-range (jitted-code-range ctx target-pc-base)))
   (define target-cpu (init-cpu ctx target-pc-base (copy-hybrid-memmgr memmgr)))
 
   ; Create representation of initial target CPU for validating callee-saved registers.

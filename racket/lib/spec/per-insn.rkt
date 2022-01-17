@@ -36,6 +36,7 @@
   (define function-alignment (bpf-target-function-alignment target))
   (define max-stack-usage (bpf-target-max-stack-usage target))
   (define bpf-stack-range (bpf-target-bpf-stack-range target))
+  (define jitted-code-range (bpf-target-jitted-code-range target))
   (define ctx-valid? (bpf-target-ctx-valid? target))
   (define epilogue-offset (bpf-target-epilogue-offset target))
 
@@ -67,7 +68,8 @@
 
   ; Create memory manager with enough symbolic bytes to return for loads.
   (define memmgr (make-hybrid-memmgr target-bitwidth 64 (max-stack-usage ctx)
-                                     #:bpf-stack-range (bpf-stack-range ctx)))
+                                     #:bpf-stack-range (bpf-stack-range ctx)
+                                     #:jitted-code-range (jitted-code-range ctx target-pc-base)))
 
   ; Create a symbolic function to represent result of BPF call.
   ; Takes 5 bv64 arguments and produces a bv64 result.
@@ -156,7 +158,16 @@
       ; Can only have performed <= MAX_TAIL_CALL_CNT number of tail calls.
       (bvule (bpf:cpu-tail-call-cnt bpf-cpu) (bv MAX_TAIL_CALL_CNT 32))
       ; Preconditions from Linux BPF verifier
-      (verifier-preconditions memmgr target insn-idx bpf-insn program-length liveset bpf-cpu)))
+      (verifier-preconditions memmgr target insn-idx bpf-insn program-length liveset bpf-cpu)
+      ; Code and stack do not wrap around
+      (bvule target-pc-base (bvsub (bv 0 target-bitwidth) max-target-size))
+      (bvule (hybrid-memmgr-stacksize memmgr) (hybrid-memmgr-stackbase memmgr))
+      ; Code and stack do not overlap
+      (||
+        (bvuge target-pc-base (hybrid-memmgr-stackbase memmgr))
+        (bvugt
+          (bvsub (hybrid-memmgr-stackbase memmgr) (hybrid-memmgr-stacksize memmgr))
+          (bvadd target-pc-base (bvsub1 max-target-size))))))
 
   ; Assume preconditions
   (assume pre)

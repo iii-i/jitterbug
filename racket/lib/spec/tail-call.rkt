@@ -38,6 +38,7 @@
   (define function-alignment (bpf-target-function-alignment target))
   (define max-stack-usage (bpf-target-max-stack-usage target))
   (define bpf-stack-range (bpf-target-bpf-stack-range target))
+  (define jitted-code-range (bpf-target-jitted-code-range target))
   (define initial-state? (bpf-target-initial-state? target))
   (define ctx-valid? (bpf-target-ctx-valid? target))
 
@@ -66,7 +67,8 @@
 
   ; Create memory manager with enough symbolic bytes to return for loads.
   (define memmgr (make-hybrid-memmgr target-bitwidth 64 (max-stack-usage ctx)
-                                      #:bpf-stack-range (bpf-stack-range ctx)))
+                                      #:bpf-stack-range (bpf-stack-range ctx)
+                                      #:jitted-code-range (jitted-code-range ctx target-pc-base)))
 
   ; Initialize the BPF CPU, PC, and registers
   (define bpf-cpu (bpf:init-cpu #:make-memmgr (thunk memmgr)

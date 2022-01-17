@@ -86,6 +86,7 @@
   function-alignment ; Minimum alignment for function addresses
   max-stack-usage ; Maximum stack size usage
   bpf-stack-range ; (ctx) -> (bottom x top) representing range of addrs in the BPF stack
+  jitted-code-range ; (ctx base) -> (start end) inclusive range of code addresses, or #f
   copy-target-cpu ; Make a copy of the target CPU
   epilogue-offset ; Where is the epilogue in target code
 ))
@@ -122,6 +123,7 @@
   #:code-size code-size
   #:max-stack-usage max-stack-usage
   #:bpf-stack-range [bpf-stack-range (lambda (ctx) #f)]
+  #:jitted-code-range [jitted-code-range (lambda a #f)]
   #:have-efficient-unaligned-access [have-efficient-unaligned-access #t]
   #:ctx-valid? [ctx-valid? (lambda a #t)]
   #:function-alignment [function-alignment 1]
@@ -139,6 +141,7 @@
               (bv function-alignment 64)
               max-stack-usage
               bpf-stack-range
+              jitted-code-range
               copy-target-cpu
               epilogue-offset))
 

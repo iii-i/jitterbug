@@ -128,8 +128,8 @@
                  [enable-stack-addr-symopt #f])
     ; Run the JIT
     (emit_insn stacklang-pc insn (context-addrs ctx) ctx)
-    (define jited-code (context-insns ctx))
-    (displayln jited-code)
+    (define jitted-code (context-insns ctx))
+    (displayln jitted-code)
     (define x86-cpu (init-x86-cpu ctx base-addr x86-memmgr))
 
     ; Preconditions: memmgr invariants hold, and cpu invariants
@@ -142,7 +142,7 @@
         [(stacklang:stop? insn)
           ; "stop" instruction, nothing to do in source, in target prove
           ; that PC after running code is same as edx.
-          (run-jitted-code base-addr x86-cpu jited-code)
+          (run-jitted-code base-addr x86-cpu jitted-code)
           (define edx (x86:cpu-gpr-ref x86-cpu (x86:symbol->gpr32 'edx)))
           (assert (equal? edx (extract 31 0 (x86:cpu-pc x86-cpu))))]
 
@@ -160,11 +160,11 @@
 
           ; Assume next instruction is in right place
           (assume (equal? (addr ctx (bvadd1 stacklang-pc))
-                          (bvadd (integer->bitvector (code-size jited-code) (bitvector 32))
+                          (bvadd (integer->bitvector (code-size jitted-code) (bitvector 32))
                                  (addr ctx stacklang-pc))))
 
           ; Run the generated code.
-          (run-jitted-code base-addr x86-cpu jited-code)
+          (run-jitted-code base-addr x86-cpu jitted-code)
 
           ; Assert invariants continue to hold.
           (assert (arch-invariants ctx stacklang-cpu x86-cpu))]))))
