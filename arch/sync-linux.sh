@@ -8,7 +8,7 @@ fi
 
 LINUX="$1"
 
-for ARCH in arm arm64 riscv x86; do
+for ARCH in arm arm64 riscv x86 s390; do
   echo "Syncing $ARCH";
   cp "$LINUX"/arch/"$ARCH"/net/*bpf* ./"$ARCH"/net/;
 done
