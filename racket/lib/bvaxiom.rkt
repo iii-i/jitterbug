@@ -1,7 +1,8 @@
 #lang rosette
 
 (require
-  (prefix-in core: serval/lib/core))
+  (prefix-in core: serval/lib/core)
+  serval/lib/debug)
 
 (provide (all-defined-out))
 
@@ -46,7 +47,7 @@
   (case (core:bv-size x)
     [(64) (commute bvmulhu64 x y)]
     [(32) (commute bvmulhu32 x y)]
-    [else (exit 1)]))
+    [else (bug #:msg (format "Unexpected bv-size: ~v\n" (core:bv-size x)))]))
 
 (define (bvmul-uf/64 x y)
   (define-symbolic bvmul64 (~> (bitvector 64) (bitvector 64) (bitvector 64)))
@@ -54,7 +55,7 @@
   (case (core:bv-size x)
     [(64) (commute bvmul64 x y)]
     [(32) (commute bvmul32 x y)]
-    [else (exit 1)]))
+    [else (bug #:msg (format "Unexpected bv-size: ~v\n" (core:bv-size x)))]))
 
 (define (bvudiv-uf/64 x y)
   (define-symbolic bvudiv64 (~> (bitvector 64) (bitvector 64) (bitvector 64)))
@@ -62,7 +63,7 @@
   (case (core:bv-size x)
     [(64) (bvudiv64 x y)]
     [(32) (bvudiv32 x y)]
-    [else (exit 1)]))
+    [else (bug #:msg (format "Unexpected bv-size: ~v\n" (core:bv-size x)))]))
 
 
 ; Axioms for 32-bit JITs.
@@ -72,7 +73,7 @@
   (case (core:bv-size x)
     ; bvmulhu is commutative
     [(32) (commute bvmulhu32 x y)]
-    [else (exit 1)]))
+    [else (bug #:msg (format "Unexpected bv-size: ~v\n" (core:bv-size x)))]))
 
 (define (bvmul-uf/32 x y)
   (define-symbolic bvmul32 (~> (bitvector 32) (bitvector 32) (bitvector 32)))
@@ -84,11 +85,11 @@
                   ((core:bvmul-proc) (extract 31 0 x) (extract 31 0 y)))]
     ; bvmul is commutative
     [(32) (commute bvmul32 x y)]
-    [else (exit 1)]))
+    [else (bug #:msg (format "Unexpected bv-size: ~v\n" (core:bv-size x)))]))
 
 (define (bvudiv-uf/32 x y)
   (define-symbolic bvudiv32 (~> (bitvector 32) (bitvector 32) (bitvector 32)))
   (case (core:bv-size x)
     ; no 64-bit bvudiv
     [(32) (bvudiv32 x y)]
-    [else (exit 1)]))
+    [else (bug #:msg (format "Unexpected bv-size: ~v\n" (core:bv-size x)))]))
