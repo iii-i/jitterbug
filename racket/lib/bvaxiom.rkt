@@ -50,21 +50,29 @@
     [else (bug #:msg (format "Unexpected bv-size: ~v\n" (core:bv-size x)))]))
 
 (define (bvmul-uf/64 x y)
-  (define-symbolic bvmul64 (~> (bitvector 64) (bitvector 64) (bitvector 64)))
-  (define-symbolic bvmul32 (~> (bitvector 32) (bitvector 32) (bitvector 32)))
-  (case (core:bv-size x)
-    [(64) (commute bvmul64 x y)]
-    [(32) (commute bvmul32 x y)]
-    [else (bug #:msg (format "Unexpected bv-size: ~v\n" (core:bv-size x)))]))
+  (define-symbolic bvmul128 (~> (bitvector 128) (bitvector 128) (bitvector 128)))
+  (define size (core:bv-size x))
+  (bug-on (> size 128) #:msg (format "Unexpected bv-size: ~v\n" size))
+  (cond
+    [(bveq x (bv 1 size)) y]
+    [(bveq y (bv 1 size)) x]
+    [else
+     (extract
+       (- size 1)
+       0
+       (commute bvmul128 (zero-extend x (bitvector 128)) (zero-extend y (bitvector 128))))]))
 
 (define (bvudiv-uf/64 x y)
-  (define-symbolic bvudiv64 (~> (bitvector 64) (bitvector 64) (bitvector 64)))
-  (define-symbolic bvudiv32 (~> (bitvector 32) (bitvector 32) (bitvector 32)))
-  (case (core:bv-size x)
-    [(64) (bvudiv64 x y)]
-    [(32) (bvudiv32 x y)]
-    [else (bug #:msg (format "Unexpected bv-size: ~v\n" (core:bv-size x)))]))
-
+  (define-symbolic bvudiv128 (~> (bitvector 128) (bitvector 128) (bitvector 128)))
+  (define size (core:bv-size x))
+  (bug-on (> size 128) #:msg (format "Unexpected bv-size: ~v\n" size))
+  (cond
+    [(bveq y (bv 1 size)) x]
+    [else
+     (define result128 (bvudiv128 (zero-extend x (bitvector 128)) (zero-extend y (bitvector 128))))
+     (when (not (equal? size 128))
+       (assume (bvzero? (extract 127 size result128))))
+     (extract (- size 1) 0 result128)]))
 
 ; Axioms for 32-bit JITs.
 
