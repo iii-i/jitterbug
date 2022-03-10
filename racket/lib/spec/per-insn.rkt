@@ -174,7 +174,7 @@
 
   ; Create target CPU with starting program counter
   (define target-cpu (init-cpu ctx target-pc-start (copy-hybrid-memmgr memmgr)))
-  (init-arch-invariants! ctx target-cpu)
+  (init-arch-invariants! ctx target-cpu target-pc-base)
   (add-symbolics target-cpu)
 
   ; Create representation of initial target CPU for validating callee-saved registers.
@@ -188,7 +188,7 @@
           (emit-insn insn-idx (struct-copy bpf:insn bpf-insn [src src] [dst dst]) next-bpf-insn ctx))
         (emit-insn insn-idx bpf-insn next-bpf-insn ctx)))
 
-  (assume (&& (arch-invariants ctx initial-cpu target-cpu)
+  (assume (&& (arch-invariants ctx initial-cpu target-cpu target-pc-base)
               (equal? (bpf:cpu-tail-call-cnt bpf-cpu) (abstract-tail-call-cnt target-cpu))
               (live-regs-equal? liveset (bpf:cpu-regs bpf-cpu) (abstract-regs target-cpu))))
 
@@ -248,7 +248,7 @@
                   (core:memmgr-invariants (core:gen-cpu-memmgr target-cpu)))
               #:msg "per-insn-correctness: memmgr invariants must continue to hold")
 
-  (bug-assert (arch-invariants ctx initial-cpu target-cpu)
+  (bug-assert (arch-invariants ctx initial-cpu target-cpu target-pc-base)
               #:msg "per-insn-correctness: target CPU invariants must continue to hold")
 
   ; Compute the final expected target PC. If BPF PC is #f, execution ended

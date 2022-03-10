@@ -43,11 +43,11 @@
       (define k (bpf:idx->reg i))
       (x86:cpu-gpr-ref x86 (bpf-reg->x86 k)))))
 
-(define (init-arch-invariants! ctx cpu)
+(define (init-arch-invariants! ctx cpu target-pc-base)
   (for ([inv (cpu-invariant-registers ctx cpu)])
     (x86:cpu-gpr-set! cpu (car inv) (cdr inv))))
 
-(define (arch-invariants ctx initial-cpu cpu)
+(define (arch-invariants ctx initial-cpu cpu target-pc-base)
   (define mm (x86:cpu-memmgr cpu))
   (define stackbase (hybrid-memmgr-stackbase mm))
   (define aux (context-aux ctx))

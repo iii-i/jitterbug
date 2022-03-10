@@ -50,11 +50,11 @@
   ; Set return value
   (riscv:gpr-set! cpu RV_REG_A0 result))
 
-(define (rv64-init-arch-invariants! ctx cpu)
+(define (rv64-init-arch-invariants! ctx cpu target-pc-base)
   (for ([inv (rv64-cpu-invariant-registers ctx cpu)])
     (riscv:gpr-set! cpu (car inv) (cdr inv))))
 
-(define (rv64-arch-invariants ctx initial-cpu cpu)
+(define (rv64-arch-invariants ctx initial-cpu cpu target-pc-base)
   (define pc (riscv:cpu-pc cpu))
   (define aux (context-aux ctx))
   (define mm (riscv:cpu-memmgr cpu))

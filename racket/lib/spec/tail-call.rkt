@@ -120,7 +120,7 @@
 
     ; Create target CPU with starting program counter
     (define target-cpu (init-cpu ctx target-pc-start (copy-hybrid-memmgr memmgr)))
-    (init-arch-invariants! ctx target-cpu)
+    (init-arch-invariants! ctx target-cpu target-pc-base)
 
     ; Create representation of initial target CPU for validating callee-saved registers.
     (define initial-cpu (init-cpu ctx target-pc-base (copy-hybrid-memmgr memmgr)))
@@ -137,7 +137,7 @@
                     (integer->bitvector (code-size tcall-insns) (bitvector target-bitwidth))))))
 
       (assume (&& precondition-next-instruction
-                  (arch-invariants ctx initial-cpu target-cpu)
+                  (arch-invariants ctx initial-cpu target-cpu target-pc-base)
                   (equal? (bpf:cpu-tail-call-cnt bpf-cpu) (abstract-tail-call-cnt target-cpu))
                   (live-regs-equal? liveset (bpf:cpu-regs bpf-cpu) (abstract-regs target-cpu))))
 
@@ -180,7 +180,7 @@
             (bug-assert (live-regs-equal? liveset (bpf:cpu-regs bpf-cpu) (abstract-regs target-cpu))
                         #:msg "tail-call: failed tail call must preserve registers")
 
-            (bug-assert (arch-invariants ctx initial-cpu target-cpu)
+            (bug-assert (arch-invariants ctx initial-cpu target-cpu target-pc-base)
                         #:msg "tail-call: failed tail call must maintain invariants")
 
             (bug-assert (equal? (make-target-pc (trunc 32 (bpf:cpu-pc bpf-cpu)))

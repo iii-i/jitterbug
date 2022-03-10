@@ -91,7 +91,7 @@
 (define (code-size vec)
   (* 4 (vector-length vec)))
 
-(define (arm32-arch-invariants ctx initial-cpu cpu)
+(define (arm32-arch-invariants ctx initial-cpu cpu target-pc-base)
   (define mm (arm32:cpu-memmgr cpu))
   (define stackbase (hybrid-memmgr-stackbase mm))
   (define (loadsavedreg off)
@@ -132,7 +132,7 @@
                             (saved-regs-stack-size)
                             (STACK_SIZE aux)))))
 
-(define (arm32-init-arch-invariants! ctx arm32-cpu)
+(define (arm32-init-arch-invariants! ctx arm32-cpu target-pc-base)
   (for ([inv (arm32-cpu-invariant-registers ctx arm32-cpu)])
     (arm32:cpu-gpr-set! arm32-cpu (car inv) (cdr inv))))
 

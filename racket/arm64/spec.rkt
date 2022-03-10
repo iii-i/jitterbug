@@ -70,7 +70,7 @@
 (define (code-size vec)
   (* 4 (vector-length vec)))
 
-(define (arm64-arch-invariants ctx initial-cpu cpu)
+(define (arm64-arch-invariants ctx initial-cpu cpu target-pc-base)
   (define pc (arm64:cpu-pc cpu))
   (define mm (arm64:cpu-memmgr cpu))
   (define stackbase (hybrid-memmgr-stackbase mm))

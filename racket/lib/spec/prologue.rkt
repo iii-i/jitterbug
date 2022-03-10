@@ -88,7 +88,7 @@
 
     (bug-assert (live-regs-equal? liveset (bpf:cpu-regs bpf-cpu) (abstract-regs target-cpu))
                 #:msg "regs must be equivalent after prologue")
-    (bug-assert (arch-invariants ctx initial-cpu target-cpu)
+    (bug-assert (arch-invariants ctx initial-cpu target-cpu target-pc-base)
                 #:msg "CPU invariants must hold after running prologue")
     (bug-assert (hybrid-memmgr-trace-equal? memmgr (core:gen-cpu-memmgr target-cpu))
                 #:msg "Prologue must not generate memory trace events"))

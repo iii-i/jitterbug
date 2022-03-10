@@ -80,11 +80,11 @@
   (riscv:gpr-set! cpu RV_REG_A0 (extract 31 0 result))
   (riscv:gpr-set! cpu RV_REG_A1 (extract 63 32 result)))
 
-(define (rv32-init-arch-invariants! ctx cpu)
+(define (rv32-init-arch-invariants! ctx cpu target-pc-base)
   (for ([inv (rv32-cpu-invariant-registers ctx cpu)])
     (riscv:gpr-set! cpu (car inv) (cdr inv))))
 
-(define (rv32-arch-invariants ctx initial-cpu cpu)
+(define (rv32-arch-invariants ctx initial-cpu cpu target-pc-base)
   (define bpf_stack_depth (bpf-prog-aux-stack_depth (context-aux ctx)))
   (define pc (riscv:cpu-pc cpu))
   (define memmgr (riscv:cpu-memmgr cpu))

@@ -58,7 +58,7 @@
       (bvule (bpf-prog-aux-stack_depth prog-aux) (bv 512 32))))
 
     (assume pre)
-    (assume (arch-invariants ctx initial-cpu target-cpu))
+    (assume (arch-invariants ctx initial-cpu target-cpu target-pc-base))
     (assume (live-regs-equal? liveset (abstract-regs target-cpu) bpf-regs))
 
     (define bpf-return-value (trunc 32 (bpf:reg-ref bpf-cpu BPF_REG_0)))
