@@ -43,7 +43,8 @@
   (define-symbolic* r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 ax (bitvector 64))
   (define bpf-regs (bpf:regs r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 ax))
   (define bpf-cpu (bpf:init-cpu #:make-memmgr (thunk #f)
-                                #:make-callmgr (thunk #f)))
+                                #:make-callmgr (thunk #f)
+                                #:big-endian (bpf-target-big-endian target)))
   (bpf:set-cpu-regs! bpf-cpu (struct-copy bpf:regs bpf-regs))
 
   ; Construct set of live registers. Only R0 (return value) is live.

@@ -72,7 +72,8 @@
 
   ; Initialize the BPF CPU, PC, and registers
   (define bpf-cpu (bpf:init-cpu #:make-memmgr (thunk memmgr)
-                                #:make-callmgr (thunk #f)))
+                                #:make-callmgr (thunk #f)
+                                #:big-endian (bpf-target-big-endian target)))
   (bpf:set-cpu-pc! bpf-cpu bpf-pc)
   (bpf:set-cpu-regs! bpf-cpu (struct-copy bpf:regs bpf-regs))
 

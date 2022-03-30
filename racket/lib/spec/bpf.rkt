@@ -61,6 +61,7 @@
 
 (struct bpf-target (
   bitwidth ; bitwidth of target ISA
+  big-endian ; Whether target ISA is big-endian
   emit-insn ; Function to run the JIT for the target ISA
   emit-prologue ; Function to emit the prologue
   initial-state? ; Assumptions that must hold on prologue entry
@@ -101,6 +102,7 @@
 
 (define (make-bpf-target
   #:target-bitwidth target-bitwidth
+  #:big-endian [big-endian #f]
   #:emit-insn emit-insn
   #:emit-prologue [emit-prologue (lambda a (error "emit-prologue not supported by target"))]
   #:initial-state? [initial-state? (lambda a (error "initial-state not supported by target"))]
@@ -130,7 +132,7 @@
   #:epilogue-offset [epilogue-offset #f]
   #:copy-target-cpu [copy-target-cpu (lambda a (error "copy-target-cpu: not supported"))])
 
-  (bpf-target target-bitwidth emit-insn emit-prologue initial-state? emit-epilogue
+  (bpf-target target-bitwidth big-endian emit-insn emit-prologue initial-state? emit-epilogue
               select-bpf-regs run-jitted-code
               simulate-call supports-pseudocall abstract-regs abstract-tail-call-cnt abstract-return-value
               init-cpu set-cpu-pc!
